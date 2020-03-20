@@ -117,9 +117,7 @@ end
 function covid_data.get_by_location_id(id, tl)
   assert(id and type(id) == 'number', 'Needs at least one argument - a number')
 
-  return request(
-    ('locations/%s?timelines=%d'):format(id, with_timelines(tl))
-  )
+  return request(('locations/%s?timelines=%d'):format(id, with_timelines(tl)))
 end
 
 return covid_data
