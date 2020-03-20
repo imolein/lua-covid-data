@@ -19,6 +19,7 @@ steps:
     - apk add curl-dev
     - luarocks install lua-curl
     - luarocks install lua-cjson 2.1.0-1
+    - luarocks install gambiarra
     - lua spec/covid-data_spec.lua
 
 trigger:
@@ -39,6 +40,7 @@ steps:
     - apk add curl-dev
     - luarocks install lua-curl
     - luarocks install lua-cjson 2.1.0-1
+    - luarocks install gambiarra
     - lua spec/covid-data_spec.lua
 
 trigger:
@@ -59,6 +61,7 @@ steps:
     - apk add curl-dev
     - luarocks install lua-curl
     - luarocks install lua-cjson 2.1.0-1
+    - luarocks install gambiarra
     - lua spec/covid-data_spec.lua
 
 trigger:
