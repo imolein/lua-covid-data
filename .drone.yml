@@ -1,0 +1,69 @@
+kind: pipeline
+name: lint
+
+steps:
+- name: lint
+  image: imolein/luarocks:5.3
+  commands:
+    - luarocks install luacheck
+    - luacheck src/covid-data.lua
+
+---
+kind: pipeline
+name: lua5.1
+
+steps:
+- name: test
+  image: imolein/luarocks:5.1
+  commands:
+    - apk add curl-dev
+    - luarocks install lua-curl
+    - luarocks install lua-cjson 2.1.0-1
+    - lua spec/covid-data_spec.lua
+
+trigger:
+  status:
+    - success
+
+depends_on:
+  - lint
+
+---
+kind: pipeline
+name: lua5.2
+
+steps:
+- name: test
+  image: imolein/luarocks:5.2
+  commands:
+    - apk add curl-dev
+    - luarocks install lua-curl
+    - luarocks install lua-cjson 2.1.0-1
+    - lua spec/covid-data_spec.lua
+
+trigger:
+  status:
+    - success
+
+depends_on:
+  - lint
+
+---
+kind: pipeline
+name: lua5.3
+
+steps:
+- name: test
+  image: imolein/luarocks:5.3
+  commands:
+    - apk add curl-dev
+    - luarocks install lua-curl
+    - luarocks install lua-cjson 2.1.0-1
+    - lua spec/covid-data_spec.lua
+
+trigger:
+  status:
+    - success
+
+depends_on:
+  - lint
