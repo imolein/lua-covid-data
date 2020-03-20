@@ -1,3 +1,5 @@
+[![Build Status](https://drone.kokolor.es/api/badges/imo/lua-covid-data/status.svg)](https://drone.kokolor.es/imo/lua-covid-data)
+
 # lua-covid-data
 
 Lua wrapper for the [coronavirus-tracker-api](https://github.com/ExpDev07/coronavirus-tracker-api).
