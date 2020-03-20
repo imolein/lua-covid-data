@@ -28,8 +28,8 @@ I am not a programmer, so here's a warning: **This code was written in an explor
 * [Functions](#functions)
    * [get_latest](#get-latest)
    * [get_locations](#get-locations-timelines)
-   * [get_by_location_code](#getlocationbycode)
-   * [get_by_location_id](#getlocationbyid)
+   * [get_by_location_code](#get_by_location_codecountry_codetimelines)
+   * [get_by_location_id](#get_by_location_ididtimelines)
 * [Tests](#tests)
 
 ## Installation
