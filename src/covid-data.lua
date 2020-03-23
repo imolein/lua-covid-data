@@ -120,4 +120,9 @@ function covid_data.get_by_location_id(id, tl)
   return request(('locations/%s?timelines=%d'):format(id, with_timelines(tl)))
 end
 
+-- returns the available data sources
+function covid_data.get_sources()
+  return request('sources')
+end
+
 return covid_data

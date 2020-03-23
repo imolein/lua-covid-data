@@ -95,4 +95,11 @@ test('get_locations_by_id() with timelines', function()
   ok(eq(has(data, 'timelines'), true), 'has timelines')
 end)
 
+test('get_sources()', function()
+  local data, err = cd.get_sources()
+
+  ok(eq(type(data), 'table'), 'table is returned')
+  ok(data:len() > 0, 'returned data is an arry > 0')
+end)
+
 report()
