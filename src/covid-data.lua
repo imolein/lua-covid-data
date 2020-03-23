@@ -1,4 +1,4 @@
-local curl = require('cURL')
+local curl = require('lcurl')
 
 local json do
   local ok, jsn = pcall(require, 'cjson')
@@ -21,23 +21,11 @@ local covid_data = {
 --- Private functions
 
 -- parses the received JSON data
-local function parse_data(body)
+local function parse_body(body)
   local ok, data = pcall(json.decode, body)
 
   if not ok then
-    return false, body
-  end
-
-  if data.latest then
-    data = data.latest
-  elseif data.locations then
-    if #data.locations > 1 then
-      data = data.locations
-    else
-      data = data.locations[1]
-    end
-  elseif data.location then
-    data = data.location
+    return false, data
   end
 
   return true, data
@@ -71,10 +59,10 @@ local function request(req)
     return false, code, body
   end
 
-  local ok, parsed = parse_data(body) -- luacheck: ignore 411/ok
+  local ok, parsed = parse_body(body) -- luacheck: ignore 411/ok
 
   if not ok then
-    return false, parsed
+    return false, parsed, body
   end
 
   return parsed
