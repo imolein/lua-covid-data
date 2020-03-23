@@ -21,11 +21,11 @@ local covid_data = {
 --- Private functions
 
 -- parses the received JSON data
-local function parse_data(json_data)
-  local ok, data = pcall(json.decode, json_data)
+local function parse_data(body)
+  local ok, data = pcall(json.decode, body)
 
   if not ok then
-    return false, json_data
+    return false, body
   end
 
   if data.latest then
@@ -64,14 +64,14 @@ local function request(req)
     return false, err
   end
 
-  local code, json_data = easy:getinfo_response_code(), table.concat(queue)
+  local code, body = easy:getinfo_response_code(), table.concat(queue)
   easy:close()
 
   if code ~= 200 then
-    return false, code
+    return false, code, body
   end
 
-  local ok, parsed = parse_data(json_data) -- luacheck: ignore 411/ok
+  local ok, parsed = parse_data(body) -- luacheck: ignore 411/ok
 
   if not ok then
     return false, parsed
