@@ -14,9 +14,23 @@ I am not a programmer, so here's a warning: **This code was written in an explor
 > covid_data = require('covid-data')
 > covid_data.get_latest()
 {
-  confirmed = 242708.0,
-  deaths = 9867.0,
-  recovered = 84854.0
+  latest = {
+    confirmed = 242708,
+    deaths = 9867,
+    recovered = 0
+  }
+}
+> covid_data.get_by_location_code('de', true)
+{
+  latest = { ... },
+  locations = {
+    {
+      id = 120,
+      country = 'Germany',
+      ...,
+      timelines = { ... }
+    }
+  }
 }
 ```
 
@@ -24,12 +38,13 @@ I am not a programmer, so here's a warning: **This code was written in an explor
 
 * [Installation](#installation)
 * [Dependencies](#dependencies)
-* [Variables](#variables)
+* [Options](#options)
 * [Functions](#functions)
-   * [get_latest](#get-latest)
-   * [get_locations](#get-locations-timelines)
-   * [get_by_location_code](#get_by_location_codecountry_codetimelines)
-   * [get_by_location_id](#get_by_location_ididtimelines)
+   * [get_sources](#get_sources)
+   * [get_latest](#get_latestsourcejhu)
+   * [get_locations](#get_locationstimelines0-sourcejhu)
+   * [get_by_location_code](#get_by_location_codecountry_codetimelines0-sourcejhu)
+   * [get_by_location_id](#get_by_location_ididtimelines0-sourcejhu)
 * [Tests](#tests)
 
 ## Installation
@@ -47,73 +62,109 @@ luarocks install lua-covid-data
 * [lua-dkjson](http://dkolf.de/src/dkjson-lua.fsl/home)
 * **or** [lua-cjson](https://luarocks.org/modules/openresty/lua-cjson) == 2.1.0-1
 
-## Variables
+## Options
 
-There are three variables which can be changed:
+### covid_data.timelines
+Set to `true` if the timelines should be displayed by default. Defaults to `false`.
 
-* **covid_data.timelines**: set to `true` if the timelines should be displayed by default [**default**: `false`]
-* **covid_data.api_url**: change if you want to use an other URL [**default**: `'https://coronavirus-tracker-api.herokuapp.com/v2/'`]
-* **covid_data.useragent**: changes the useragent string for requests [**default**: `'lua-covid-data/$version libcurl/$version (https://codeberg.org/imo/lua-covid-data)`]
+### covid_data.sources
+Table with available data sources at the time of writing this. The `source` parameter of the functions is checked agains this table and chooses the default if the given source is not in this table. If the API should support other sources in the future, they can be quickly added here without having to modify the module code. Defaults to `{ jhu = 'jhu', csbs = 'csbs' }`.
+
+### covid_data.source
+The default data source. Defaults to `'jhu'`.
+
+### covid_data.api_url
+The API URL coronavirus tracker API. Change it if you run your own instance of the tracker API. Defaults to `'https://coronavirus-tracker-api.herokuapp.com/v2/'`.
+
+### covid_data.useragent
+The useragent string for the request. Change it if you want to use another one. Defaults to `'lua-covid-data/$version libcurl/$version (https://codeberg.org/imo/lua-covid-data)`.
 
 ## Functions
 
-### `get_latest()`
+### `get_sources()`
 
-Get latest total data.
+Get available data sources.
 
 **Returns:**
 
-(**table** | **false**) data | `false` in case of error
-(**string**) error message or unparsed data
+(**table** | **false**) data | `false` in case of error  
+(**string**) error message  
+(**string**) in case of error the raw data (eg. the body)
 
-### `get_locations([timelines])`
+**See:** [Sources Endpoint](https://github.com/ExpDev07/coronavirus-tracker-api/#sources-endpoint)
+
+### `get_latest([source='jhu'])`
+
+Get latest total data.
+
+**Parameter:**
+
+* *source*: (**string**) the data source [**default**: `'jhu'`]
+
+**Returns:**
+
+(**table** | **false**) data | `false` in case of error  
+(**string**) error message  
+(**string**) in case of error the raw data (eg. the body)
+
+**See:** [Latest Endpoint](https://github.com/ExpDev07/coronavirus-tracker-api/#latest-endpoint)
+
+### `get_locations([timelines=0[, source='jhu']])`
 
 Get latest data per location.
 
 **Parameter:**
 
-* *timelines*: (**boolean**) set to `true` if you want timelines in the data
+* *timelines*: (**boolean**) set to `true` if you want timelines in the data [**default**: `0`]
+* *source*: (**string**) the data source [**default**: `'jhu'`]
 
 **Returns:**
 
-(**table** | **false**) data | `false` in case of error
-(**string**) error message or unparsed data
+(**table** | **false**) data | `false` in case of error  
+(**string**) error message  
+(**string**) in case of error the raw data (eg. the body)
 
-### `get_by_location_code(country_code[,timelines])`
+**See:** [Locations Endpoint](https://github.com/ExpDev07/coronavirus-tracker-api/#locations-endpoint)
+
+### `get_by_location_code(country_code[,timelines=0[, source='jhu']])`
 
 Get latest data for a specific location specified by a country code.
 
 **Parameter:**
 
 * *country_code*: (**string**) an [alpha-2 country_code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
-* *timelines*: (**boolean**) set to `true` if you want timelines in the data
+* *timelines*: (**boolean**) set to `true` if you want timelines in the data [**default**: `0`]
+* *source*: (**string**) the data source [**default**: `'jhu'`]
 
 **Returns:**
 
-(**table** | **false**) data | `false` in case of error
-(**string**) error message or unparsed data
+(**table** | **false**) data | `false` in case of error  
+(**string**) error message  
+(**string**) in case of error the raw data (eg. the body)
 
-**Raises:**
+**Raises:** Error if `country_code` is missing or not a `string`
 
-Error if `country_code` is missing or not a `string`
+**See:** [Locations Endpoint](https://github.com/ExpDev07/coronavirus-tracker-api/#locations-endpoint)
 
-### `get_by_location_id(id[,timelines])`
+### `get_by_location_id(id[,timelines=0[, source='jhu']])`
 
 Get latest data for a specific location specified by `id`.
 
 **Parameter:**
 
 * *id*: (**number**) location id
-* *timelines*: (**boolean**) set to `true` if you want timelines in the data
+* *timelines*: (**boolean**) set to `true` if you want timelines in the data [**default**: `0`]
+* *source*: (**string**) the data source [**default**: `'jhu'`]
 
 **Returns:**
 
-(**table** | **false**) data | `false` in case of error
-(**string**) error message or unparsed data
+(**table** | **false**) data | `false` in case of error  
+(**string**) error message  
+(**string**) in case of error the raw data (eg. the body)
 
-**Raises:**
+**Raises:** Error if `id` is missing or not a `number`
 
-Error if `id` is missing or not a `number`
+**See:** [Locations Endpoint](https://github.com/ExpDev07/coronavirus-tracker-api/#locations-endpoint)
 
 ## Tests
 
