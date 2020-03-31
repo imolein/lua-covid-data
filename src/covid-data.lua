@@ -11,7 +11,7 @@ local json do
 end
 
 local covid_data = {
-  _VERSION = '0.1.0-0',
+  _VERSION = '0.2.0-0',
   _DESCRIPTION = 'Lua wrapper for Coronavirus Tracker API',
   _URL = 'https://codeberg.org/imo/lua-covid-data',
   _LICENSE = 'MIT'
@@ -29,6 +29,23 @@ local function parse_body(body)
   end
 
   return true, data
+end
+
+-- with our without timelines
+local function with_timelines(tl)
+  return (tl == true or covid_data.timelines) and 1 or 0
+end
+
+-- build query
+local query_format = '%s=%s'
+local function build_query(query_data)
+  local query = {}
+
+  for k, v in pairs(query_data) do
+    table.insert(query, query_format:format(k, v))
+  end
+
+  return table.concat(query, '&')
 end
 
 -- makes the request and returns the data
@@ -68,49 +85,75 @@ local function request(req)
   return parsed
 end
 
--- with our without timelines
-local function with_timelines(tl)
-  return (tl or covid_data.timelines) and 1 or 0
-end
+
+--- Public variables
+
+-- some default variables
+covid_data.timelines = false
+covid_data.sources = { jhu = 'jhu', csbs = 'csbs' }
+covid_data.source = covid_data.sources.jhu
+covid_data.api_url = 'https://coronavirus-tracker-api.herokuapp.com/v2/'
+covid_data.useragent = ('lua-covid-data/%s libcurl/%s (%s)')
+  :format(covid_data._VERSION, curl.version_info('version'), covid_data._URL)
 
 
 --- Public functions
 
--- some default variables
-covid_data.timelines = false
-covid_data.api_url = 'https://coronavirus-tracker-api.herokuapp.com/v2/'
-covid_data.useragent = ('lua-covid-data/%s libcurl/%s (%s)')
-  :format(covid_data._VERSION, curl.version_info('version'),covid_data._URL)
-
 -- get latest total data
-function covid_data.get_latest()
-  return request('latest')
+function covid_data.get_latest(source)
+  local query = build_query({
+    source = covid_data.sources[source] or covid_data.source
+  })
+
+  return request(('latest?%s'):format(query))
 end
 
 -- get latest data per location
-function covid_data.get_locations(tl)
-  return request(('locations?timelines=%d'):format(with_timelines(tl)))
+function covid_data.get_locations(tl, source)
+  local query = build_query({
+    timelines = with_timelines(tl),
+    source = covid_data.sources[source] or covid_data.source
+  })
+
+  return request(('locations?%s'):format(query))
 end
 
 -- get latest data for a specific location specified by country code
-function covid_data.get_by_location_code(country_code, tl)
+function covid_data.get_by_location_code(country_code, tl, source)
   assert(country_code and type(country_code) == 'string', 'Needs at least one argument - a string')
 
+  local query = build_query({
+    country_code = country_code:lower(),
+    timelines = with_timelines(tl),
+    source = covid_data.sources[source] or covid_data.source
+  })
+
   return request(
-    ('locations?country_code=%s&timelines=%d'):format(country_code:upper(), with_timelines(tl))
+    ('locations?%s'):format(query)
   )
 end
 
 -- get latest data for a specific location specified by id
-function covid_data.get_by_location_id(id, tl)
+function covid_data.get_by_location_id(id, tl, source)
   assert(id and type(id) == 'number', 'Needs at least one argument - a number')
 
-  return request(('locations/%s?timelines=%d'):format(id, with_timelines(tl)))
+  local query = build_query({
+    timelines = with_timelines(tl),
+    source = covid_data.sources[source] or covid_data.source
+  })
+
+  return request(('locations/%s?%s'):format(id, query))
 end
 
 -- returns the available data sources
 function covid_data.get_sources()
   return request('sources')
+end
+
+if _TEST then
+  covid_data._build_query = build_query
+  covid_data._with_timelines = with_timelines
+  covid_data._parse_body = parse_body
 end
 
 return covid_data
