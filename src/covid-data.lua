@@ -150,7 +150,7 @@ function covid_data.get_sources()
   return request('sources')
 end
 
-if _TEST then
+if _TEST then -- luacheck: ignore 113/_TEST
   covid_data._build_query = build_query
   covid_data._with_timelines = with_timelines
   covid_data._parse_body = parse_body
